@@ -24,7 +24,7 @@ class NFXInfoController: NFXGenericController
         self.scrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
         self.scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.scrollView.autoresizesSubviews = true
-        self.scrollView.backgroundColor = UIColor.clear()
+        self.scrollView.backgroundColor = UIColor.clear
         self.view.addSubview(self.scrollView)
         
         self.textLabel = UILabel()
@@ -51,7 +51,7 @@ class NFXInfoController: NFXGenericController
         }
     }
     
-    func generateInfoString(_ ipAddress: String) -> AttributedString
+    func generateInfoString(_ ipAddress: String) -> NSAttributedString
     {
         var tempString: String
         tempString = String()

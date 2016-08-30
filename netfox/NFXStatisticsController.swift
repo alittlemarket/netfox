@@ -40,7 +40,7 @@ class NFXStatisticsController: NFXGenericController
         self.scrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
         self.scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.scrollView.autoresizesSubviews = true
-        self.scrollView.backgroundColor = UIColor.clear()
+        self.scrollView.backgroundColor = UIColor.clear
         self.view.addSubview(self.scrollView)
 
         self.textLabel = UILabel()
@@ -54,15 +54,15 @@ class NFXStatisticsController: NFXGenericController
         
         self.scrollView.contentSize = CGSize(width: scrollView.frame.width, height: self.textLabel.frame.maxY)
         
-        NotificationCenter.default().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(NFXGenericController.reloadData),
-            name: "NFXReloadData",
+            name: NSNotification.Name(rawValue: "NFXReloadData"),
             object: nil)
         
     }
     
-    func getReportString() -> AttributedString
+    func getReportString() -> NSAttributedString
     {
         var tempString: String
         tempString = String()
@@ -126,11 +126,11 @@ class NFXStatisticsController: NFXGenericController
             if (model.timeInterval != nil) {
                 totalResponseTime += model.timeInterval!
                 
-                if model.timeInterval < self.fastestResponseTime {
+                if model.timeInterval! < self.fastestResponseTime {
                     self.fastestResponseTime = model.timeInterval!
                 }
                 
-                if model.timeInterval > self.slowestResponseTime {
+                if model.timeInterval! > self.slowestResponseTime {
                     self.slowestResponseTime = model.timeInterval!
                 }
             }

@@ -37,7 +37,7 @@ class NFXListController: NFXGenericController, UITableViewDelegate, UITableViewD
         self.tableView.dataSource = self
         self.view.addSubview(self.tableView)
         
-        self.tableView.register(NFXListCell.self, forCellReuseIdentifier: NSStringFromClass(NFXListCell))
+        self.tableView.register(NFXListCell.self, forCellReuseIdentifier: NSStringFromClass(NFXListCell.self))
         
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage.NFXSettings(),
                                                                  style: .plain,
@@ -56,7 +56,7 @@ class NFXListController: NFXGenericController, UITableViewDelegate, UITableViewD
         searchView.frame = CGRect(x: 30, y: 0, width: self.view.frame.width - 60, height: 0)
         searchView.autoresizingMask = [.flexibleWidth]
         searchView.autoresizesSubviews = true
-        searchView.backgroundColor = UIColor.clear()
+        searchView.backgroundColor = UIColor.clear
         
         self.searchController = UISearchController(searchResultsController: nil)
         self.searchController.searchResultsUpdater = self
@@ -66,23 +66,23 @@ class NFXListController: NFXGenericController, UITableViewDelegate, UITableViewD
         searchView.addSubview(self.searchController.searchBar)
         self.searchController.searchBar.autoresizingMask = [.flexibleWidth]
         self.searchController.searchBar.sizeToFit()
-        self.searchController.searchBar.backgroundColor = UIColor.clear()
+        self.searchController.searchBar.backgroundColor = UIColor.clear
         self.searchController.searchBar.searchBarStyle = .minimal
         searchView.frame = self.searchController.searchBar.frame
-        self.searchController.view.backgroundColor = UIColor.clear()
+        self.searchController.view.backgroundColor = UIColor.clear
         
         self.navigationItem.titleView = searchView
 
-        NotificationCenter.default().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(NFXGenericController.reloadData),
-            name: "NFXReloadData",
+            name: NSNotification.Name(rawValue: "NFXReloadData"),
             object: nil)
         
-        NotificationCenter.default().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(NFXListController.deactivateSearchController),
-            name: "NFXDeactivateSearch",
+            name: NSNotification.Name(rawValue: "NFXDeactivateSearch"),
             object: nil)
     }
     
@@ -108,13 +108,13 @@ class NFXListController: NFXGenericController, UITableViewDelegate, UITableViewD
     
     func updateSearchResults(for searchController: UISearchController)
     {
-        let predicateURL = Predicate(format: "requestURL contains[cd] '\(searchController.searchBar.text!)'")
-        let predicateMethod = Predicate(format: "requestMethod contains[cd] '\(searchController.searchBar.text!)'")
-        let predicateType = Predicate(format: "responseType contains[cd] '\(searchController.searchBar.text!)'")
+        let predicateURL = NSPredicate(format: "requestURL contains[cd] '\(searchController.searchBar.text!)'")
+        let predicateMethod = NSPredicate(format: "requestMethod contains[cd] '\(searchController.searchBar.text!)'")
+        let predicateType = NSPredicate(format: "responseType contains[cd] '\(searchController.searchBar.text!)'")
 
         let predicates = [predicateURL, predicateMethod, predicateType]
         
-        let searchPredicate = CompoundPredicate(orPredicateWithSubpredicates: predicates)
+        let searchPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
         
         let array = (NFXHTTPModelManager.sharedInstance.getModels() as NSArray).filtered(using: searchPredicate)
         self.filteredTableData = array as! [NFXHTTPModel]
@@ -139,7 +139,7 @@ class NFXListController: NFXGenericController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: NSStringFromClass(NFXListCell), for: indexPath) as! NFXListCell
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: NSStringFromClass(NFXListCell.self), for: indexPath) as! NFXListCell
         
         if (self.searchController.isActive) {
             if self.filteredTableData.count > 0 {

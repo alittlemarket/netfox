@@ -30,7 +30,7 @@ class NFXHTTPModel: NSObject
     
     var randomHash: NSString?
     
-    var shortType: NSString = HTTPModelShortType.OTHER.rawValue
+    var shortType: NSString = HTTPModelShortType.OTHER.rawValue as NSString
     
     var noResponse: Bool = true
     
@@ -56,9 +56,9 @@ class NFXHTTPModel: NSObject
         self.responseStatus = response.getNFXStatus()
         self.responseHeaders = response.getNFXHeaders()
         
-        if let contentType = response.getNFXHeaders()["Content-Type"] as? String {
+        if let headers = response.getNFXHeaders() as? [String: AnyObject], let contentType = headers["Content-Type"] as? String {
             self.responseType = contentType.components(separatedBy: ";")[0]
-            self.shortType = getShortTypeFrom(self.responseType!).rawValue
+            self.shortType = getShortTypeFrom(self.responseType!).rawValue as NSString
         }
         
         self.timeInterval = Float(self.responseDate!.timeIntervalSince(self.requestDate!))
@@ -81,8 +81,9 @@ class NFXHTTPModel: NSObject
     {
         var bodyString: NSString?
         
-        if self.shortType == HTTPModelShortType.IMAGE.rawValue {
-            bodyString = data.base64EncodedString(.encodingEndLineWithLineFeed)
+        if self.shortType as String == HTTPModelShortType.IMAGE.rawValue {
+            
+            bodyString = data.base64EncodedString(options: .endLineWithLineFeed) as NSString
 
         } else {
             if let tempBodyString = NSString.init(data: data, encoding: String.Encoding.utf8.rawValue) {
@@ -102,7 +103,7 @@ class NFXHTTPModel: NSObject
         if let contentType = contentType {
             let shortType = getShortTypeFrom(contentType)
             if let output = prettyPrint(rawData, type: shortType) {
-                return output
+                return output as NSString
             }
         }
         return NSString(data: rawData, encoding: String.Encoding.utf8.rawValue) ?? ""
@@ -128,7 +129,7 @@ class NFXHTTPModel: NSObject
     func getRandomHash() -> NSString
     {
         if !(self.randomHash != nil) {
-            self.randomHash = UUID().uuidString
+            self.randomHash = UUID().uuidString as NSString
         }
         return self.randomHash!
     }
@@ -174,11 +175,11 @@ class NFXHTTPModel: NSObject
     
     func getTimeFromDate(_ date: Date) -> String
     {
-        let calendar = Calendar.current()
-        let components = calendar.components([.hour, .minute], from: date)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: date)
         let hour = components.hour
         let minutes = components.minute
-        if minutes < 10 {
+        if minutes! < 10 {
             return "\(hour):0\(minutes)"
         } else {
             return "\(hour):\(minutes)"
@@ -226,7 +227,7 @@ class NFXHTTPModel: NSObject
     
     func isSuccessful() -> Bool
     {
-        if (self.responseStatus != nil) && (self.responseStatus < 400) {
+        if (self.responseStatus != nil) && (self.responseStatus! < 400) {
             return true
         } else {
             return false

@@ -21,7 +21,7 @@ enum HTTPModelShortType: String
 
 extension UIWindow
 {
-    override public func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
+    override open func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
     {
         if NFX.sharedInstance().getSelectedGesture() == .shake {
             if (event!.type == .motion && event!.subtype == .motionShake) {
@@ -123,7 +123,7 @@ extension URLRequest
     func getNFXURL() -> String
     {
         if (url != nil) {
-            return url!.absoluteString!;
+            return url!.absoluteString;
         } else {
             return "-"
         }
@@ -180,7 +180,7 @@ extension URLResponse
     
     func getNFXHeaders() -> Dictionary<NSObject, AnyObject>
     {
-        return (self as? HTTPURLResponse)?.allHeaderFields ?? Dictionary()
+        return (self as? HTTPURLResponse)?.allHeaderFields as [NSObject : AnyObject]? ?? Dictionary()
     }
 }
 
@@ -227,8 +227,9 @@ public extension UIDevice
         var identifier = ""
         
         for child in mirror.children {
-            if let value = child.value as? Int8 where value != 0 {
-                identifier.append(UnicodeScalar(UInt8(value)))
+            if let value = child.value as? Int8 , value != 0 {
+                let scalar = UnicodeScalar(UInt8(value))
+                identifier.append(Character(scalar))
             }
         }
         
@@ -283,60 +284,60 @@ class NFXDebugInfo {
     
     class func getNFXAppName() -> String
     {
-        return Bundle.main().infoDictionary?["CFBundleName"] as? String ?? ""
+        return Bundle.main.infoDictionary?["CFBundleName"] as? String ?? ""
     }
     
     class func getNFXAppVersionNumber() -> String
     {
-        return Bundle.main().infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
     }
     
     class func getNFXAppBuildNumber() -> String
     {
-        return Bundle.main().infoDictionary?["CFBundleVersion"] as? String ?? ""
+        return Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
     }
     
     class func getNFXBundleIdentifier() -> String
     {
-        return Bundle.main().bundleIdentifier ?? ""
+        return Bundle.main.bundleIdentifier ?? ""
     }
     
     class func getNFXiOSVersion() -> String
     {
-        return UIDevice.current().systemVersion ?? ""
+        return UIDevice.current.systemVersion
     }
     
     class func getNFXDeviceType() -> String
     {
-        return UIDevice.getNFXDeviceType() ?? ""
+        return UIDevice.getNFXDeviceType() 
     }
     
     class func getNFXDeviceScreenResolution() -> String
     {
-        let scale = UIScreen.main().scale
-        let bounds = UIScreen.main().bounds
+        let scale = UIScreen.main.scale
+        let bounds = UIScreen.main.bounds
         let width = bounds.size.width * scale
         let height = bounds.size.height * scale
         return "\(width) x \(height)"
     }
     
-    class func getNFXIP(_ completion:(result: String) -> Void)
+    class func getNFXIP(_ completion:@escaping (_ result: String) -> Void)
     {
         var req: NSMutableURLRequest
         req = NSMutableURLRequest(url: URL(string: "https://api.ipify.org/?format=json")!)
         URLProtocol.setProperty("1", forKey: "NFXInternal", in: req)
         
-        let session = URLSession.shared()
+        let session = URLSession.shared
         session.dataTask(with: req as URLRequest) { (data, response, error) in
             do {
-                let rawJsonData = try JSONSerialization.jsonObject(with: data!, options: [.allowFragments])
-                if let ipAddress = rawJsonData.value(forKey: "ip") {
-                    completion(result: ipAddress as! String)
+                let rawJsonData = try JSONSerialization.jsonObject(with: data!, options: [.allowFragments]) as! [String : AnyObject]
+                if let ipAddress = rawJsonData["ip"] {
+                    completion(_: ipAddress as! String)
                 } else {
-                    completion(result: "-")
+                    completion("-")
                 }
             } catch {
-                completion(result: "-")
+                completion("-")
             }
             
         }.resume()

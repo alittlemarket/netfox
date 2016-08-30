@@ -71,14 +71,14 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         return tempButton
     }
     
-    func createDetailsView(_ content: AttributedString, forView: EDetailsView) -> UIScrollView
+    func createDetailsView(_ content: NSAttributedString, forView: EDetailsView) -> UIScrollView
     {
         var scrollView: UIScrollView
         scrollView = UIScrollView()
         scrollView.frame = CGRect(x: 0, y: 44, width: self.view.frame.width, height: self.view.frame.height - 44)
         scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         scrollView.autoresizesSubviews = true
-        scrollView.backgroundColor = UIColor.clear()
+        scrollView.backgroundColor = UIColor.clear
         
         var textLabel: UILabel
         textLabel = UILabel()
@@ -95,13 +95,13 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         moreButton = UIButton.init(frame: CGRect(x: 20, y: textLabel.frame.maxY + 10, width: scrollView.frame.width - 40, height: 40))
         moreButton.backgroundColor = UIColor.NFXGray44Color()
         
-        if ((forView == EDetailsView.request) && (self.selectedModel.requestBodyLength > 1024)) {
+        if ((forView == EDetailsView.request) && (self.selectedModel.requestBodyLength! > 1024)) {
             moreButton.setTitle("Show request body", for: UIControlState())
             moreButton.addTarget(self, action: #selector(NFXDetailsController.requestBodyButtonPressed), for: .touchUpInside)
             scrollView.addSubview(moreButton)
             scrollView.contentSize = CGSize(width: textLabel.frame.width, height: moreButton.frame.maxY)
 
-        } else if ((forView == EDetailsView.response) && (self.selectedModel.responseBodyLength > 1024)) {
+        } else if ((forView == EDetailsView.response) && (self.selectedModel.responseBodyLength! > 1024)) {
             moreButton.setTitle("Show response body", for: UIControlState())
             moreButton.addTarget(self, action: #selector(NFXDetailsController.responseBodyButtonPressed), for: .touchUpInside)
             scrollView.addSubview(moreButton)
@@ -195,7 +195,7 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         
         var bodyDetailsController: NFXGenericBodyDetailsController
         
-        if self.selectedModel.shortType == HTTPModelShortType.IMAGE.rawValue {
+        if self.selectedModel.shortType as String == HTTPModelShortType.IMAGE.rawValue {
             bodyDetailsController = NFXImageBodyDetailsController()
         } else {
             bodyDetailsController = NFXRawBodyDetailsController()
@@ -206,7 +206,7 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
     }
     
     
-    func getInfoStringFromObject(_ object: NFXHTTPModel) -> AttributedString
+    func getInfoStringFromObject(_ object: NFXHTTPModel) -> NSAttributedString
     {
         var tempString: String
         tempString = String()
@@ -227,14 +227,14 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         return formatNFXString(tempString)
     }
     
-    func getRequestStringFromObject(_ object: NFXHTTPModel) -> AttributedString
+    func getRequestStringFromObject(_ object: NFXHTTPModel) -> NSAttributedString
     {
         var tempString: String
         tempString = String()
         
         tempString += "-- Headers --\n\n"
 
-        if object.requestHeaders?.count > 0 {
+        if let count = object.requestHeaders?.count, count > 0 {
             for (key, val) in (object.requestHeaders)! {
                 tempString += "[\(key)] \n\(val)\n\n"
             }
@@ -245,10 +245,12 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         
         tempString += "\n-- Body --\n\n"
 
-        if (object.requestBodyLength == 0) {
-            tempString += "Request body is empty\n"
-        } else if (object.requestBodyLength > 1024) {
-            tempString += "Too long to show. If you want to see it, please tap the following button\n"
+        if let bodyLength = object.requestBodyLength {
+            if bodyLength == 0 {
+                tempString += "Request body is empty\n"
+            } else if bodyLength > 1024 {
+                tempString += "Too long to show. If you want to see it, please tap the following button\n"
+            }
         } else {
             tempString += "\(object.getRequestBody())\n"
         }
@@ -256,7 +258,7 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         return formatNFXString(tempString)
     }
     
-    func getResponseStringFromObject(_ object: NFXHTTPModel) -> AttributedString
+    func getResponseStringFromObject(_ object: NFXHTTPModel) -> NSAttributedString
     {
         if (object.noResponse) {
             return NSMutableAttributedString(string: "No response")
@@ -267,8 +269,8 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         
         tempString += "-- Headers --\n\n"
 
-        if object.responseHeaders?.count > 0 {
-            for (key, val) in object.responseHeaders! {
+        if let responseHeaders = object.responseHeaders, responseHeaders.count > 0 {
+            for (key, val) in responseHeaders {
                 tempString += "[\(key)] \n\(val)\n\n"
             }
         } else {
@@ -278,10 +280,12 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
 
         tempString += "\n-- Body --\n\n"
 
-        if (object.responseBodyLength == 0) {
-            tempString += "Response body is empty\n"
-        } else if (object.responseBodyLength > 1024) {
-            tempString += "Too long to show. If you want to see it, please tap the following button\n"
+        if let bodyLength = object.responseBodyLength {
+            if bodyLength == 0 {
+                tempString += "Response body is empty\n"
+            } else if bodyLength > 1024 {
+                tempString += "Too long to show. If you want to see it, please tap the following button\n"
+            }
         } else {
             tempString += "\(object.getResponseBody())\n"
         }
@@ -330,7 +334,7 @@ class NFXDetailsController: NFXGenericController, MFMailComposeViewControllerDel
         }
     }
     
-    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: NSError?)
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?)
     {
         self.dismiss(animated: true, completion: nil)
     }
